@@ -942,7 +942,7 @@
         (#.(char-code #\y) (flet ((canonicalize (fragment) (canonicalize-identifier mediator fragment)))
                              (declare (dynamic-extent #'canonicalize))
                              (uri-namestring-identifier (thrift:stream-read-string stream) #'canonicalize)))
-        (#.(char-code #\r) (puri:parse-uri (thrift:stream-read-string stream)))
+        (#.(char-code #\r) (b9-puri:parse-uri (thrift:stream-read-string stream)))
         (#.(char-code #\i) (uuid:byte-array-to-uuid (thrift:stream-read-binary stream)))
         (#.(char-code #\b) (thrift:stream-read-binary stream))))))
 

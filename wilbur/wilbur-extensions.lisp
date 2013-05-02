@@ -80,8 +80,7 @@
       :all (filter-statements (db-triples db)))))
 
 (defmethod rdf:save-repository ((db wilbur:db) (stream stream))
-  (dolist (triple (wilbur:db-triples db))
-    (format stream "~&~/n3:format/" triple))
+  (wilbur::db-dump db stream (wilbur:db-triples db) :ntriples)
   (terpri stream))
 
 
@@ -104,7 +103,7 @@
       (declare (dynamic-extent #'matching-triple-p))
       (find-if #'matching-triple-p (wilbur:db-triples db)))))
 
-#+(or)                                  ; handled by rdf:project
+                                  ; handled by rdf:project
 (defmethod rdf:load-repository-as ((db wilbur:db) (source stream) (form mime:application/n3))
   (let ((blanks (make-hash-table :test #'equal)))
     (flet ((intern-resource (uri-namestring)
@@ -114,7 +113,7 @@
            (intern-blank-node (id-string)
              (or (gethash id-string blanks)
                  (setf (gethash id-string blanks)
-                       (de.setf.resource:wilbur-blank-node id-string)))))
+                       (wilbur-blank-node id-string)))))
       (let ((n3::*intern-resource* #'intern-resource)
             (n3::*intern-literal* #'intern-literal)
             (n3::*intern-blank-node* #'intern-blank-node)

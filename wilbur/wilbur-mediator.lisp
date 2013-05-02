@@ -329,7 +329,7 @@
             (*uri-symbols*
              (uri-namestring-identifier namestring #'canonicalize))
             (t
-             (puri:uri namestring))))))
+             (b9-puri:uri namestring))))))
 
 
 (defmethod rdf:predicate ((statement wilbur:triple))

@@ -25,14 +25,14 @@
                ;; in favor of mediating all rdf operations through a triple store
                ;; or direct processing to ntriple files.
                ;; :de.setf.xml
-               :net.common-lisp.closer-mop
-               :net.dardoria.uuid       ; order matters to get asdf to find them
-               :com.github.ironclad
+               :closer-mop
+               :uuid       ; order matters to get asdf to find them
+               :ironclad
                ;; ! the reader conficts with that of agraph - need to reinstate that
-               :net.sourceforge.wilbur
-               :com.b9.puri.puri-ppcre
+               :wilbur
+               :puri-ppcre
                :de.setf.utility.mime
-               :org.apache.thrift)
+               :thrift)
   :serial t
   :description "A CLOS-aware RDF interface feature equivalent to Spira.rb"
   :components ((:file "packages")
@@ -50,7 +50,7 @@
                (:file "resource-lifecycle")
                #-lispworks              ; would need porting
                (:module :wilbur
-                :components ((:file "wilbur-extensions")
+                :components ((:file "wilbur-extensions" :depends-on ("wilbur-mediator"))
                              (:file "wilbur-mediator"))))
   :long-description
   "`de.setf.resource` implements a transparent bidirectional projection between CLOS models and linked data
