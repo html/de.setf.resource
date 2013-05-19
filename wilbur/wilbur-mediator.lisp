@@ -169,6 +169,9 @@
   "Implement RDF equality for the UUID x node combination."
   (rdf:equal n2 n1))
 
+(defmethod rdf:equal ((n1 uuid:uuid) (n2 uuid:uuid))
+  "Implement RDF equality for the UUID x node combination."
+  (uuid:uuid= n1 n2))
 
 (defmethod rdf:equal ((s1 wilbur:triple) (s2 wilbur:triple))
   "Triple equivalence devolves to testing the constituents."
