@@ -205,7 +205,7 @@
 
   (:method (object (state rdf:persistent) name)
     (let ((value (if (slot-boundp object name)
-                   (slot-value object 'name)
+                   (slot-value object name)
                    +unbound-marker+)))
       (unless (assoc name (object-history object))
         (setf-object-history (acons name value (object-history object)) object))
@@ -289,28 +289,29 @@
  statements to reflect the new state, and record the concrete statements which arereflected back."
     (let ((statement (make-quad :subject object :context (object-graph object))))
       (flet ((project-modified (destination)
-               (labels ((project-slot-value (value)
-                          (typecase value
-                            (list (dolist (value value) (project-slot-value value)))
-                            (t
-                             (setf (quad-object statement) value)
-                             (rdf:project-graph statement destination))))
+               (labels ((project-statement (stmt)
+                          (rdf:insert-statement (get-object-repository object) stmt))
                         (delete-each (statement)
                           (typecase statement
                             ((eql +unbound-marker+) )
                             (list (dolist (statement statement) (delete-each statement)))
-                            (t (rdf:delete-statement destination statement)))))
+                            (t (rdf:delete-statement (get-object-repository object) statement)))))
                  (loop for (slot . nil) in (object-history object)
-                       do (let ((statement-sd (slot-definition-statement-slot slot)))
+                       do (let ((statement-sd 
+                                  (find slot (c2mop:class-direct-slots (class-of object))
+                                        :test (lambda (item1 item2) 
+                                                (string= 
+                                                  (format nil "~A.statement." (string-downcase item1))
+                                                  (string-downcase item2)))
+                                        :key #'c2mop:slot-definition-name)
+                                  #+l(slot-definition-statement-slot slot))
+                                (slot-sd (find slot (c2mop:class-direct-slots (class-of object)) :key #'c2mop:slot-definition-name)))
                             ;; for each slot which was associated with a statement, delete the respective statement
                             (when (slot-boundp object (c2mop:slot-definition-name statement-sd))
                               (delete-each (funcall (slot-definition-reader statement-sd) object)))
                             ;; write literal slots as the direct statement object and
                             ;; write property slots as the reference.
-                            (setf (quad-predicate statement) (slot-definition-predicate slot))
-                            (funcall (funcall (slot-definition-writer statement-sd) object)
-                                     (project-slot-value (slot-value (c2mop:slot-definition-name slot) object))
-                                     object))))))
+                            (de.setf.resource.implementation::project-slot-using-statement object slot-sd statement #'project-statement))))))
         (rdf:project-graph #'project-modified (object-repository object)))))
 
   (:method (object (state rdf:deleted-persistent))
